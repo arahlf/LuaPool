@@ -1,17 +1,51 @@
 require 'ball'
 require 'color'
+require 'pooltable'
 
 math.randomseed(os.time());
 math.random() math.random() math.random()
 
+function getDistance(circle1, circle2)
+    -- hack...
+    local radius1, radius2 = circle1.shape:getRadius(), circle2.shape:getRadius()
+    local x1, y1, x2, y2 = circle1:getBody():getX(),
+                           circle1:getBody():getY(),
+                           circle2:getBody():getX(),
+                           circle2:getBody():getY()
+    --print(x1 .. ', ' .. y1 .. ' - ' .. x2 .. ', ' .. y2)
+    return math.sqrt(math.pow(x2-x1, 2), math.pow(y2-y1, 2))
+end
+
+function onAdd(a, b, contact)
+    local ball, pocket
+
+    if (instanceOf(Pocket, a) and instanceOf(Ball, b)) then
+        pocket, ball = a, b
+    elseif (instanceOf(Ball, a) and instanceOf(Pocket, b)) then
+        pocket, ball = b, a
+    end
+
+    if (ball and pocket) then
+        local distance = getDistance(ball, pocket)
+
+        if (distance <= 10) then
+            ball:getBody():setPosition(pocket:getBody():getPosition())
+        end
+    end
+end
+
 world = love.physics.newWorld(0, 0, love.graphics.getWidth(), love.graphics.getHeight())
+world:setCallbacks(onAdd, onAdd, onRemove)
+
+
+
 balls = {}
 walls = {}
 ballsMoving = false
 
 local radius = 10
 local ballColors = {
-    { 244, 251, 40 },
+    { 225, 230, 40 },
     { 62, 76, 203 },
     { 242, 38, 19 },
     { 119, 0, 174 },
@@ -27,26 +61,21 @@ for i=1, 7 do
     table.insert(balls, Ball(radius, color, false))
 end
 
-local eightBall = Ball(radius, Color(0, 0, 0), false)
+local eightBall = Ball(radius, Color(0, 0, 0), true)
 table.insert(balls, 5, eightBall)
+
+local tableWidth = 620
+local tableHeight = 220
+local tableThickness = 25
+local tableX = (love.graphics.getWidth() - tableWidth) / 2
+local tableY = (love.graphics.getHeight() - tableHeight) / 2
+
+local poolTable = PoolTable(tableX, tableY, tableWidth, tableHeight, tableThickness)
 
 
 function love.load()
-    local tableX = 0
-    local tableY = 0
-    local tableWidth = 600
-    local tableHeight = 200
-    local tableThickness = 10
-
-    -- build the walls
-    addWall(tableX, tableY, tableWidth, tableThickness)
-    addWall(tableX, tableY + tableHeight, tableWidth, tableThickness)
-    addWall(tableX, tableY + tableThickness, tableThickness, tableHeight - tableThickness)
-    addWall(tableX + tableWidth - tableThickness, tableY + tableThickness, tableThickness, tableHeight - tableThickness)
-
-    
-    local x = tableX + 400
-    local y = tableY + 100
+    local x = tableX + tableWidth - 200
+    local y = tableY + tableHeight / 2 + radius / 2
     local count = 0
 
     -- position the balls
@@ -63,12 +92,13 @@ function love.load()
     end
     
     cue = Ball(radius, Color(255, 255, 255), false)
-    cue:getBody():setPosition(10, 10)
+    cue:getBody():setPosition(tableX + 100, tableY + tableHeight / 2 + radius / 2)
 
     table.insert(balls, cue)
 
-    love.graphics.setBackgroundColor(193, 187, 249)
+    love.graphics.setBackgroundColor(206, 206, 206)
     love.graphics.setLineWidth(3)
+    love.graphics.setCaption('LuaPool')
 
     --love.graphics.setBlendMode("multiplicative")
 end
@@ -93,14 +123,8 @@ function love.draw()
     local width = love.graphics.getWidth()
     local height = love.graphics.getHeight()
 
-    -- draw the walls
-    love.graphics.setColor(160, 101, 31)
+    poolTable:draw()
 
-    for index, wall in ipairs(walls) do
-        love.graphics.polygon("fill", wall.shape:getPoints())
-    end
-    love.graphics.setColor(4, 172, 140)
-    love.graphics.rectangle("fill", 10, 10, 580, 190)
 
     -- draw the balls
     for index, ball in ipairs(balls) do
@@ -114,24 +138,18 @@ function love.draw()
 end
 
 function love.keypressed(key)
-    if (not moving and key == ' ') then
+    if (key == 'w' and love.keyboard.isDown('lctrl')) then
+        love.event.push('q') -- quit the game
+    end
+end
+
+function love.mousepressed(x, y, button)
+    if (not moving and button == 'l') then
         local x1, y1, x2, y2 = cue:getBody():getX(), cue:getBody():getY(), love.mouse.getX(), love.mouse.getY()
         local angle = math.atan2(y2-y1, x2-x1)
         local distance = math.sqrt(math.pow(x2-x1, 2) + math.pow(y2-y1, 2))
         local factor = math.min(distance / 5, 75);
 
         cue:getBody():applyImpulse(math.cos(angle) * factor, math.sin(angle) * factor)
-    elseif (key == 'w' and love.keyboard.isDown('lctrl')) then
-        love.event.push('q') -- quit the game
     end
-end
-
-function addWall(x, y, width, height)
-    local wall = {}
-
-    wall.body = love.physics.newBody(world, x, y)
-    wall.shape = love.physics.newRectangleShape(wall.body, width / 2, height / 2, width, height)
-    wall.shape:setFriction(.05)
-
-    table.insert(walls, wall)
 end

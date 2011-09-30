@@ -14,6 +14,7 @@ function Ball:initialize(radius, color, striped)
     self.body:setLinearDamping(1)
     self.shape:setFriction(.01)
     self.shape:setRestitution(.85)
+    self.shape:setData(self)
 end
 
 function Ball:update(dt)
