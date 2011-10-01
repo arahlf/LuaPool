@@ -1,5 +1,4 @@
 require 'ball'
-require 'color'
 require 'pooltable'
 
 math.randomseed(os.time());
@@ -30,6 +29,7 @@ function onAdd(a, b, contact)
 
         if (distance <= 10) then
             ball:getBody():setPosition(pocket:getBody():getPosition())
+            ball.shape:setCategory(2)
         end
     end
 end
@@ -44,24 +44,14 @@ walls = {}
 ballsMoving = false
 
 local radius = 10
-local ballColors = {
-    { 225, 230, 40 },
-    { 62, 76, 203 },
-    { 242, 38, 19 },
-    { 119, 0, 174 },
-    { 235, 133, 0 },
-    { 49, 198, 45 },
-    { 150, 79, 22 }
-}
 
 -- create the balls
 for i=1, 7 do
-    local color = Color(ballColors[i][1], ballColors[i][2], ballColors[i][3])
-    table.insert(balls, Ball(radius, color, true))
-    table.insert(balls, Ball(radius, color, false))
+    table.insert(balls, Ball(radius, i, true))
+    table.insert(balls, Ball(radius, i, false))
 end
 
-local eightBall = Ball(radius, Color(0, 0, 0), true)
+local eightBall = Ball(radius, 8, true)
 table.insert(balls, 5, eightBall)
 
 local tableWidth = 620
@@ -91,7 +81,7 @@ function love.load()
         end
     end
     
-    cue = Ball(radius, Color(255, 255, 255), false)
+    cue = Ball(radius, 9, false) -- kinda hacky
     cue:getBody():setPosition(tableX + 100, tableY + tableHeight / 2 + radius / 2)
 
     table.insert(balls, cue)
@@ -99,8 +89,6 @@ function love.load()
     love.graphics.setBackgroundColor(206, 206, 206)
     love.graphics.setLineWidth(3)
     love.graphics.setCaption('LuaPool')
-
-    --love.graphics.setBlendMode("multiplicative")
 end
 
 function love.update(dt)

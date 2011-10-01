@@ -2,6 +2,8 @@ require 'middleclass'
 
 Pocket = class('Pocket')
 
+local image = love.graphics.newImage('pocket.png')
+
 function Pocket:initialize(x, y)
     self.body = love.physics.newBody(world, x, y)
     self.shape = love.physics.newCircleShape(self.body, 0, 0, 15)
@@ -15,5 +17,5 @@ end
 
 function Pocket:draw()
     love.graphics.setColor(0, 0, 0)
-    love.graphics.circle("fill", self.body:getX(), self.body:getY(), self.shape:getRadius(), 50)
+    love.graphics.draw(image, self.body:getX(), self.body:getY(), 0, 1, 1, self.shape:getRadius(), self.shape:getRadius())
 end

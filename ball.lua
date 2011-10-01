@@ -1,20 +1,24 @@
 require 'middleclass'
-require 'color'
 
 Ball = class('Ball')
 
-function Ball:initialize(radius, color, striped)
+local stripe = love.graphics.newImage('ball.png')
+local sprite = love.graphics.newImage('balls.png')
+
+function Ball:initialize(radius, number, striped)
     self.body = love.physics.newBody(world, 0, 0, 1)
     self.shape = love.physics.newCircleShape(self.body, 0, 0, radius)
-    self.color = color
     self.striped = striped
     self.lastX = -1
     self.lastY = -1
+    self.quad = love.graphics.newQuad(0, number * 20 - 20, 20, 20, 20, 180)
 
     self.body:setLinearDamping(1)
     self.shape:setFriction(.01)
     self.shape:setRestitution(.85)
     self.shape:setData(self)
+    self.shape:setCategory(1)
+    self.shape:setMask(2)
 end
 
 function Ball:update(dt)
@@ -25,12 +29,12 @@ end
 function Ball:draw()
     local x, y, radius = self.body:getX(), self.body:getY(), self.shape:getRadius()
 
-    self.color:set()
-    love.graphics.circle("fill", x, y, radius, 50)
-
     love.graphics.setColor(255, 255, 255)
+    --love.graphics.circle("fill", x, y, radius, 50)
+    love.graphics.drawq(sprite, self.quad, x, y, 0, 1, 1, radius, radius)
+
     if (self.striped) then
-        love.graphics.circle("fill", x, y, radius / 2, 50)
+        love.graphics.draw(stripe, x, y, 0, 1, 1, radius / 2, radius / 2)
     end
 end
 
