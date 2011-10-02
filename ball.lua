@@ -30,7 +30,6 @@ function Ball:draw()
     local x, y, radius = self.body:getX(), self.body:getY(), self.shape:getRadius()
 
     love.graphics.setColor(255, 255, 255)
-    --love.graphics.circle("fill", x, y, radius, 50)
     love.graphics.drawq(sprite, self.quad, x, y, 0, 1, 1, radius, radius)
 
     if (self.striped) then

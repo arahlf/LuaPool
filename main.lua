@@ -4,6 +4,11 @@ require 'pooltable'
 math.randomseed(os.time());
 math.random() math.random() math.random()
 
+debugging = false
+guides = false
+
+-- TODO cue ball power streak
+
 function getDistance(circle1, circle2)
     -- hack...
     local radius1, radius2 = circle1.shape:getRadius(), circle2.shape:getRadius()
@@ -11,26 +16,13 @@ function getDistance(circle1, circle2)
                            circle1:getBody():getY(),
                            circle2:getBody():getX(),
                            circle2:getBody():getY()
-    --print(x1 .. ', ' .. y1 .. ' - ' .. x2 .. ', ' .. y2)
+    
     return math.sqrt(math.pow(x2-x1, 2), math.pow(y2-y1, 2))
 end
 
 function onAdd(a, b, contact)
-    local ball, pocket
-
-    if (instanceOf(Pocket, a) and instanceOf(Ball, b)) then
-        pocket, ball = a, b
-    elseif (instanceOf(Ball, a) and instanceOf(Pocket, b)) then
-        pocket, ball = b, a
-    end
-
-    if (ball and pocket) then
-        local distance = getDistance(ball, pocket)
-
-        if (distance <= 10) then
-            ball:getBody():setPosition(pocket:getBody():getPosition())
-            ball.shape:setCategory(2)
-        end
+    if (a == 'foo' or b == 'foo') then
+        print("hollaaaaa")
     end
 end
 
@@ -54,18 +46,20 @@ end
 local eightBall = Ball(radius, 8, true)
 table.insert(balls, 5, eightBall)
 
-local tableWidth = 620
-local tableHeight = 220
+local poolTable = PoolTable()
+local tableWidth = poolTable:getWidth()
+local tableHeight = poolTable:getHeight()
 local tableThickness = 25
 local tableX = (love.graphics.getWidth() - tableWidth) / 2
 local tableY = (love.graphics.getHeight() - tableHeight) / 2
 
-local poolTable = PoolTable(tableX, tableY, tableWidth, tableHeight, tableThickness)
+poolTable:setPosition(math.floor(tableX), math.floor(tableY)) -- non-integer pixel measurements display blurry :(
 
 
 function love.load()
-    local x = tableX + tableWidth - 200
-    local y = tableY + tableHeight / 2 + radius / 2
+
+    local x = tableX + 510 - radius * 2
+    local y = tableY + tableHeight / 2
     local count = 0
 
     -- position the balls
@@ -82,12 +76,11 @@ function love.load()
     end
     
     cue = Ball(radius, 9, false) -- kinda hacky
-    cue:getBody():setPosition(tableX + 100, tableY + tableHeight / 2 + radius / 2)
+    cue:getBody():setPosition(tableX + 100, tableY + 100)
 
     table.insert(balls, cue)
 
-    love.graphics.setBackgroundColor(206, 206, 206)
-    love.graphics.setLineWidth(3)
+    love.graphics.setBackgroundColor(71, 101, 71)
     love.graphics.setCaption('LuaPool')
 end
 
@@ -121,11 +114,35 @@ function love.draw()
 
     if (not moving) then
         love.graphics.setColor(255, 0, 0)
-        love.graphics.line(cue:getBody():getX(), cue:getBody():getY(), love.mouse.getX(), love.mouse.getY())
+        local x1, y1, x2, y2 = cue:getBody():getX(), cue:getBody():getY(), love.mouse.getX(), love.mouse.getY()
+        local angle = math.atan2(y2-y1, x2-x1)
+
+        local left = angle - math.pi / 2
+        local right = angle + math.pi / 2
+        local distance = math.sqrt(math.pow(x2-x1, 2) + math.pow(y2-y1, 2))
+
+        local lStart, lEnd = x1 + math.cos(left) * 10, y1 + math.sin(left) * 10
+        local lStart2, lEnd2 = lStart + math.cos(angle) * distance, lEnd + math.sin(angle) * distance
+
+        local rStart, rEnd = x1 + math.cos(right) * 10, y1 + math.sin(right) * 10
+        local rStart2, rEnd2 = rStart + math.cos(angle) * distance, rEnd + math.sin(angle) * distance
+
+        love.graphics.setLineWidth(3)
+        love.graphics.line(x1, y1, x2, y2)
+
+        if (guides) then
+            love.graphics.setLineWidth(1)
+            love.graphics.line(lStart, lEnd, lStart2, lEnd2)
+            love.graphics.line(rStart, rEnd, rStart2, rEnd2)
+        end
     end
 end
 
 function love.keypressed(key)
+    if (key == ' ') then
+        guides = not guides
+    end
+
     if (key == 'w' and love.keyboard.isDown('lctrl')) then
         love.event.push('q') -- quit the game
     end
