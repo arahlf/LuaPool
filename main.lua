@@ -9,41 +9,22 @@ guides = false
 
 -- TODO cue ball power streak
 
-function onCollison(a, b, contact)
-    local ball, pocket
-
-    if (a == "pocket" and instanceOf(Ball, b)) then
-        ball, pocket = b, a
-    elseif (instanceOf(Ball, a) and a == "pocket") then
-        ball, pocket = a, b
-    end
-
-    if (ball ~= nil and pocket ~= nil) then
-        if (ball == cue) then
-            poolTable:moveCue()
-        else
-            print("Sank: " .. ball:getNumber())
-        end
-    end
-end
-
-world = love.physics.newWorld(0, 0, love.graphics.getWidth(), love.graphics.getHeight())
-world:setCallbacks(onCollison)
+local world = love.physics.newWorld(0, 0, love.graphics.getWidth(), love.graphics.getHeight())
 
 
 local radius = 10
 
 function love.load()
     -- create the balls
-    cue = Ball(radius, nil, false)
+    cue = Ball(world, radius, nil, false)
 
     balls = {}
 
     for i=1, 15 do
-        table.insert(balls, Ball(radius, i, i >= 8))
+        table.insert(balls, Ball(world, radius, i, i >= 8))
     end
 
-    poolTable = PoolTable(cue, balls)
+    poolTable = PoolTable(world, cue, balls)
     local tableWidth = poolTable:getWidth()
     local tableHeight = poolTable:getHeight()
     local tableThickness = 25

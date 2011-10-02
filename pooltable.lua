@@ -6,14 +6,20 @@ local tableImage = love.graphics.newImage('table.png')
 local width = tableImage:getWidth()
 local height = tableImage:getHeight()
 
-function PoolTable:initialize(cue, balls)
+function PoolTable:initialize(world, cue, balls)
+    self.world = world
     self.cue = cue
     self.balls = balls
-    self.body = body
     self.body = love.physics.newBody(world)
+    self.madeBalls = {}
     self.pockets = {}
     self.cushions = {}
     self.placingCue = false
+
+    local me = self
+    world:setCallbacks(function(...)
+        me:onCollision(...)
+    end)
 
     -- counterclockwise starting from bottom left
     self:addCushion(53, 359, 61, 351, 332, 351, 334, 359)
@@ -93,8 +99,9 @@ end
 
 function PoolTable:addPocket(...)
     local pocket = love.physics.newPolygonShape(self.body, ...)
-    pocket:setSensor(true)
+    pocket:setSensor("foo")
     pocket:setData("pocket")
+    pocket:setMask(2)
 
     table.insert(self.pockets, pocket)
 end
@@ -132,6 +139,13 @@ end
 
 function PoolTable:rack()
     -- TODO randomly sort
+
+    local nums = { 1, 2, 3 }
+    local r = {}
+
+
+
+
     local radius = balls[1]:getRadius()
     local x = self:getX() + 510 - radius * 2
     local y = self:getY() + height / 2
@@ -146,6 +160,7 @@ function PoolTable:rack()
         for j=1, i do
             count = count + 1
 
+            balls[count]:show()
             balls[count]:setPosition(x + radius*i*2 - (i * 2), currentY + radius)
             currentY = currentY + radius * 2
         end
@@ -158,4 +173,22 @@ function PoolTable:moveCue(x, y)
 
     self.cue:stopMoving()
     self.cue:setPosition(x, y)
+end
+
+function PoolTable:onCollision(a, b, contact)
+    local ball, pocket
+
+    if (a == "pocket" and instanceOf(Ball, b)) then
+        ball, pocket = b, a
+    elseif (instanceOf(Ball, a) and a == "pocket") then
+        ball, pocket = a, b
+    end
+
+    if (ball ~= nil and pocket ~= nil) then
+        if (ball == cue) then
+            poolTable:moveCue()
+        else
+            ball:hide()
+        end
+    end
 end

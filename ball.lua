@@ -5,13 +5,14 @@ Ball = class('Ball')
 local stripe = love.graphics.newImage('ball.png')
 local sprite = love.graphics.newImage('balls.png')
 
-function Ball:initialize(radius, number, striped)
+function Ball:initialize(world, radius, number, striped)
     self.number = number
     self.striped = striped
     self.body = love.physics.newBody(world, 0, 0, 1)
     self.shape = love.physics.newCircleShape(self.body, 0, 0, radius)
     self.lastX = -1
     self.lastY = -1
+    self.hidden = false
 
     -- TODO store all the balls in the sprite?
     local tile = number
@@ -39,13 +40,15 @@ function Ball:update(dt)
 end
 
 function Ball:draw()
-    local x, y, radius = self.body:getX(), self.body:getY(), self.shape:getRadius()
+    if (not self.hidden) then
+        local x, y, radius = self.body:getX(), self.body:getY(), self.shape:getRadius()
 
-    love.graphics.setColor(255, 255, 255)
-    love.graphics.drawq(sprite, self.quad, x, y, 0, 1, 1, radius, radius)
+        love.graphics.setColor(255, 255, 255)
+        love.graphics.drawq(sprite, self.quad, x, y, 0, 1, 1, radius, radius)
 
-    if (self.striped) then
-        love.graphics.draw(stripe, x, y, 0, 1, 1, radius / 2, radius / 2)
+        if (self.striped) then
+            love.graphics.draw(stripe, x, y, 0, 1, 1, radius / 2, radius / 2)
+        end
     end
 end
 
@@ -79,4 +82,14 @@ end
 
 function Ball:getNumber()
     return self.number
+end
+
+function Ball:hide()
+    self.hidden = true
+    self.shape:setCategory(2)
+end
+
+function Ball:show()
+    self.hidden = false
+    self.shape:setCategory(1)
 end
