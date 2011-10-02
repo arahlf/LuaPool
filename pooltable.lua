@@ -6,13 +6,14 @@ local tableImage = love.graphics.newImage('table.png')
 local width = tableImage:getWidth()
 local height = tableImage:getHeight()
 
-function PoolTable:initialize()
-    self.width = width
-    self.height = height
-    self.thickness = thickness
+function PoolTable:initialize(cue, balls)
+    self.cue = cue
+    self.balls = balls
+    self.body = body
     self.body = love.physics.newBody(world)
     self.pockets = {}
     self.cushions = {}
+    self.placingCue = false
 
     -- counterclockwise starting from bottom left
     self:addCushion(53, 359, 61, 351, 332, 351, 334, 359)
@@ -39,13 +40,39 @@ function PoolTable:getHeight()
     return height
 end
 
+function PoolTable:getX()
+    return self.body:getX()
+end
+
+function PoolTable:getY()
+    return self.body:getY()
+end
+
 function PoolTable:setPosition(x, y)
     self.body:setPosition(x, y)
 end
 
+function PoolTable:update()
+    if (self.placingCue) then
+        local x, y, radius = love.mouse.getX(), love.mouse.getY(), self.cue:getRadius()
+
+        x = math.max(x, 60 + self:getX() + radius)
+        x = math.min(x, 191 + self:getX() - radius)
+        y = math.max(y, 36 + self:getY() + radius)
+        y = math.min(y, 350 + self:getY() - radius)
+
+        self.cue:setPosition(x, y)
+    end
+
+    self.cue:update(dt)
+    for index, ball in ipairs(self.balls) do
+        ball:update(dt)
+    end
+end
+
 function PoolTable:draw()
     love.graphics.setColor(255, 255, 255)
-    love.graphics.draw(tableImage, self.body:getX(), self.body:getY())
+    love.graphics.draw(tableImage, self:getX(), self:getY())
 
     if (debugging) then
         for index, cushion in ipairs(self.cushions) do
@@ -56,12 +83,18 @@ function PoolTable:draw()
             love.graphics.polygon("fill", pocket:getPoints())
         end
     end
+
+    -- draw the balls
+    self.cue:draw()
+    for index, ball in ipairs(self.balls) do
+        ball:draw()
+    end
 end
 
 function PoolTable:addPocket(...)
     local pocket = love.physics.newPolygonShape(self.body, ...)
     pocket:setSensor(true)
-    pocket:setData('foo')
+    pocket:setData("pocket")
 
     table.insert(self.pockets, pocket)
 end
@@ -71,4 +104,58 @@ function PoolTable:addCushion(...)
     cushion:setFriction(.05)
 
     table.insert(self.cushions, cushion)
+end
+
+function PoolTable:beginPlacingCue()
+    self.placingCue = true
+end
+
+function PoolTable:placeCue()
+    self.placingCue = false
+end
+
+function PoolTable:isPlacingCue()
+    return self.placingCue
+end
+
+function PoolTable:areBallsMoving()
+    local moving = false
+
+    for index, ball in ipairs(self.balls) do
+        if (ball:isMoving()) then
+            moving = true
+        end
+    end
+
+    return false -- TODO
+end
+
+function PoolTable:rack()
+    -- TODO randomly sort
+    local radius = balls[1]:getRadius()
+    local x = self:getX() + 510 - radius * 2
+    local y = self:getY() + height / 2
+
+    local count = 0
+
+    -- position the balls
+    for i=1, 5 do
+        local height = radius * 2 * i
+        local currentY = y - height / 2
+
+        for j=1, i do
+            count = count + 1
+
+            balls[count]:setPosition(x + radius*i*2 - (i * 2), currentY + radius)
+            currentY = currentY + radius * 2
+        end
+    end
+end
+
+function PoolTable:moveCue(x, y)
+    x = x or self:getX() + 100
+    y = y or self:getY() + height / 2
+
+    self.cue:stopMoving()
+    self.cue:setPosition(x, y)
 end
