@@ -138,18 +138,11 @@ function PoolTable:areBallsMoving()
 end
 
 function PoolTable:rack()
-    -- TODO randomly sort
+    self:randomizeBalls()
 
-    local nums = { 1, 2, 3 }
-    local r = {}
-
-
-
-
-    local radius = balls[1]:getRadius()
+    local radius = self.balls[1]:getRadius()
     local x = self:getX() + 510 - radius * 2
     local y = self:getY() + height / 2
-
     local count = 0
 
     -- position the balls
@@ -160,8 +153,8 @@ function PoolTable:rack()
         for j=1, i do
             count = count + 1
 
-            balls[count]:show()
-            balls[count]:setPosition(x + radius*i*2 - (i * 2), currentY + radius)
+            self.balls[count]:show()
+            self.balls[count]:setPosition(x + radius*i*2 - (i * 2), currentY + radius)
             currentY = currentY + radius * 2
         end
     end
@@ -191,4 +184,26 @@ function PoolTable:onCollision(a, b, contact)
             ball:hide()
         end
     end
+end
+
+function PoolTable:randomizeBalls()
+    local tempBalls = {}
+    local eightBall
+
+    -- randomly sort the balls
+    while (#self.balls > 0) do
+        local index = math.random(1, #self.balls)
+        local ball = self.balls[index]
+
+        if (ball:getNumber() == 8) then
+            eightBall = ball
+        else
+            table.insert(tempBalls, ball)
+        end
+
+        table.remove(self.balls, index)
+    end
+    table.insert(tempBalls, 5, eightBall)
+
+    self.balls = tempBalls
 end

@@ -86,6 +86,11 @@ function love.keypressed(key)
     if (key == 'w' and love.keyboard.isDown('lctrl')) then
         love.event.push('q') -- quit the game
     end
+
+    if (key == 'esc') then
+        poolTable:rack()
+        poolTable:moveCue()
+    end
 end
 
 function love.mousepressed(x, y, button)
