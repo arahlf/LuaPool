@@ -1,4 +1,5 @@
 require 'middleclass'
+require 'rectangle'
 
 PoolTable = class('PoolTable')
 
@@ -62,6 +63,10 @@ end
 
 function PoolTable:setPosition(x, y)
     self.body:setPosition(x, y)
+end
+
+function PoolTable:getBoundingBox()
+    return Rectangle(0, 0, 0, 0)
 end
 
 function PoolTable:update()
