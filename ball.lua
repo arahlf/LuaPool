@@ -14,7 +14,6 @@ function Ball:initialize(world, radius, number, striped)
     self.lastY = -1
     self.hidden = false
 
-    -- TODO store all the balls in the sprite?
     local tile = number
     
     if (tile == nil) then
@@ -42,12 +41,14 @@ end
 function Ball:draw()
     if (not self.hidden) then
         local x, y, radius = self.body:getX(), self.body:getY(), self.shape:getRadius()
+        local lx, ly = self.body:getLinearVelocity()
+        local angle = math.atan2(ly, lx)
 
         love.graphics.setColor(255, 255, 255)
-        love.graphics.drawq(sprite, self.quad, x, y, 0, 1, 1, radius, radius)
+        love.graphics.drawq(sprite, self.quad, x, y, angle, 1, 1, radius, radius)
 
         if (self.striped) then
-            love.graphics.draw(stripe, x, y, 0, 1, 1, radius / 2, radius / 2)
+            -- love.graphics.draw(stripe, x, y, 0, 1, 1, radius / 2, radius / 2)
         end
     end
 end
