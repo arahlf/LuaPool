@@ -21,13 +21,19 @@ function PoolTable:initialize(world, cue, balls)
         me:onCollision(...)
     end)
 
+    -- bounding box
+    -- top 36
+    -- right 666
+    -- bottom 350
+    -- left 36
+
     -- counterclockwise starting from bottom left
-    self:addCushion(53, 359, 61, 351, 332, 351, 334, 359)
-    self:addCushion(369, 359, 370, 351, 641, 351, 650, 359)
-    self:addCushion(675, 333, 667, 326, 667, 60, 675, 52)
-    self:addCushion(370, 35, 369, 27, 650, 27, 642, 35)
-    self:addCushion(61, 35, 53, 27, 334, 27, 333, 35)
-    self:addCushion(27, 334, 27, 52, 35, 60, 35, 326)
+    self:addCushion(53, 359, 61, 350, 332, 350, 334, 359)
+    self:addCushion(369, 359, 370, 350, 641, 350, 650, 359)
+    self:addCushion(675, 333, 666, 326, 666, 60, 675, 52)
+    self:addCushion(370, 36, 369, 27, 650, 27, 642, 36)
+    self:addCushion(61, 36, 53, 27, 334, 27, 333, 36)
+    self:addCushion(27, 334, 27, 52, 36, 60, 36, 326)
 
     -- counterclockwise starting from bottom left
     self:addPocket(27, 335, 52, 359, 43, 367, 19, 344)
