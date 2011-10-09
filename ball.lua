@@ -12,6 +12,7 @@ function Ball:initialize(world, radius, number, striped)
     self.shape = love.physics.newCircleShape(self.body, 0, 0, radius)
     self.lastX = -1
     self.lastY = -1
+    self.moving = false
     self.hidden = false
 
     local tile = number
@@ -34,6 +35,10 @@ function Ball:initialize(world, radius, number, striped)
 end
 
 function Ball:update(dt)
+    local newX, newY = self.body:getX(), self.body:getY()
+
+    self.moving = newX ~= self.lastX and newY ~= self.lastY
+
     self.lastX = self.body:getX()
     self.lastY = self.body:getY()
 end
@@ -48,7 +53,7 @@ function Ball:draw()
         love.graphics.drawq(sprite, self.quad, x, y, angle, 1, 1, radius, radius)
 
         if (self.striped) then
-            -- love.graphics.draw(stripe, x, y, 0, 1, 1, radius / 2, radius / 2)
+            love.graphics.draw(stripe, x, y, 0, 1, 1, radius / 2, radius / 2)
         end
     end
 end
@@ -74,7 +79,7 @@ function Ball:hit(factorX, factorY)
 end
 
 function Ball:isMoving()
-    return self.body:getX() ~= self.lastX or self.body:getY() ~= self.lastY
+    return self.moving
 end
 
 function Ball:stopMoving()

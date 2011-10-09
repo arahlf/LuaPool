@@ -53,7 +53,7 @@ function love.draw()
     poolTable:draw()
 
     if (not poolTable:areBallsMoving() and not poolTable:isPlacingCue()) then
-        love.graphics.setColor(255, 0, 0)
+        love.graphics.setColor(255, 255, 255)
         local x1, y1, x2, y2 = cue:getX(), cue:getY(), love.mouse.getX(), love.mouse.getY()
         local angle = math.atan2(y2-y1, x2-x1)
 
@@ -67,7 +67,6 @@ function love.draw()
         local rStart, rEnd = x1 + math.cos(right) * 10, y1 + math.sin(right) * 10
         local rStart2, rEnd2 = rStart + math.cos(angle) * distance, rEnd + math.sin(angle) * distance
 
-        love.graphics.setLineWidth(3)
         love.graphics.line(x1, y1, x2, y2)
 
         if (guides) then
